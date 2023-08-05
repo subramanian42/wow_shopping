@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wow_shopping/app/assets.dart';
 import 'package:wow_shopping/backend/backend.dart';
 import 'package:wow_shopping/features/home/widgets/promo_carousel.dart';
+import 'package:wow_shopping/features/main/cubit/cubit/main_screen_cubit.dart';
 import 'package:wow_shopping/features/main/main_screen.dart';
 import 'package:wow_shopping/models/product_item.dart';
 import 'package:wow_shopping/widgets/app_icon.dart';
@@ -28,9 +30,9 @@ class _HomePageState extends State<HomePage> {
   void _onPromoPressed(PromoModel promo) {
     // FIXME: demo of gotoSection
     if (promo.asset == Assets.promo1) {
-      MainScreen.of(context).gotoSection(NavItem.wishlist);
+      context.read<MainScreenCubit>().gotoSection(NavItem.wishlist);
     } else if (promo.asset == Assets.promo2) {
-      MainScreen.of(context).gotoSection(NavItem.cart);
+      context.read<MainScreenCubit>().gotoSection(NavItem.cart);
     }
   }
 
@@ -109,7 +111,8 @@ class _SliverTopSellingState extends State<SliverTopSelling> {
   Widget build(BuildContext context) {
     return FutureBuilder<List<ProductItem>>(
       future: _futureTopSelling,
-      builder: (BuildContext context, AsyncSnapshot<List<ProductItem>> snapshot) {
+      builder:
+          (BuildContext context, AsyncSnapshot<List<ProductItem>> snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const SliverFillRemaining(
             child: Center(
