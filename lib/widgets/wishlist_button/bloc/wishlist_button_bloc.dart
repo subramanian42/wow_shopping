@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:wow_shopping/backend/backend.dart';
@@ -15,7 +17,11 @@ class WishlistButtonBloc
         super(WishlistButtonState(
             isWishlisted: wishlistRepo.isInWishlist(item))) {
     on<TogglePressed>(_onTogglePressed);
+    _wishlistSubscription = _wishlistRepo
+        .streamIsInWishlist(item)
+        .listen((value) => add(TogglePressed(value: value)));
   }
+  late final StreamSubscription<bool> _wishlistSubscription;
   final ProductItem _item;
   final WishlistRepo _wishlistRepo;
   Future<void> _onTogglePressed(
@@ -30,4 +36,9 @@ class WishlistButtonBloc
     emit(state.copyWith(event.value));
   }
 
+  @override
+  Future<void> close() {
+    _wishlistSubscription.cancel();
+    return super.close();
+  }
 }
