@@ -45,7 +45,7 @@ class WishlistButtonBloc
     WishlistToggleStarted event,
     Emitter<WishlistButtonState> emit,
   ) async {
-    emit.onEach(_wishlistRepo.streamIsInWishlist(_item),
+    await emit.onEach(_wishlistRepo.streamIsInWishlist(_item),
         onData: (value) => add(TogglePressed(value: value)));
   }
 
