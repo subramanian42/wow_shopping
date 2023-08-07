@@ -17,11 +17,16 @@ class WishlistButtonBloc
         super(WishlistButtonState(
             isWishlisted: wishlistRepo.isInWishlist(item))) {
     on<TogglePressed>(_onTogglePressed);
-    _wishlistSubscription = _wishlistRepo
-        .streamIsInWishlist(item)
-        .listen((value) => add(TogglePressed(value: value)));
+    // method 1 : subscribing to the iswishlisted stream
+    on<WishlistToggleStarted>(_onWishlistToggleStarted);
+
+    // method 2: subscribing to the wishlist stream
+    // _wishlistSubscription = _wishlistRepo
+    //     .streamIsInWishlist(item)
+    //     .listen((value) => add(TogglePressed(value: value)));
   }
-  late final StreamSubscription<bool> _wishlistSubscription;
+  //
+  // late final StreamSubscription<bool> _wishlistSubscription;
   final ProductItem _item;
   final WishlistRepo _wishlistRepo;
   Future<void> _onTogglePressed(
@@ -36,9 +41,17 @@ class WishlistButtonBloc
     emit(state.copyWith(event.value));
   }
 
-  @override
-  Future<void> close() {
-    _wishlistSubscription.cancel();
-    return super.close();
+  Future<void> _onWishlistToggleStarted(
+    WishlistToggleStarted event,
+    Emitter<WishlistButtonState> emit,
+  ) async {
+    emit.onEach(_wishlistRepo.streamIsInWishlist(_item),
+        onData: (value) => add(TogglePressed(value: value)));
   }
+
+  // @override
+  // Future<void> close() {
+  //   _wishlistSubscription.cancel();
+  //   return super.close();
+  // }
 }

@@ -19,7 +19,8 @@ class WishlistButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          WishlistButtonBloc(wishlistRepo: context.wishlistRepo, item: item),
+          WishlistButtonBloc(wishlistRepo: context.wishlistRepo, item: item)
+            ..add(WishlistToggleStarted()),
       child: const WishlistButtonView(),
     );
   }
