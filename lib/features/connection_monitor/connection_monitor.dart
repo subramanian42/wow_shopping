@@ -5,7 +5,7 @@ import 'package:wow_shopping/widgets/common.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 @immutable
-class ConnectionMonitor extends StatefulWidget {
+class ConnectionMonitor extends StatelessWidget {
   const ConnectionMonitor({
     super.key,
     required this.child,
@@ -14,18 +14,13 @@ class ConnectionMonitor extends StatefulWidget {
   final Widget child;
 
   @override
-  State<ConnectionMonitor> createState() => _ConnectionMonitorState();
-}
-
-class _ConnectionMonitorState extends State<ConnectionMonitor> {
-  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ConnectionMonitorBloc(
         connectivity: Connectivity(),
       )..add(ConnectivityStarted(isInitial: true)),
       child: ConnectionMonitorView(
-        child: widget.child,
+        child: child,
       ),
     );
   }
