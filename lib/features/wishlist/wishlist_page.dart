@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wow_shopping/app/assets.dart';
 import 'package:wow_shopping/app/theme.dart';
 import 'package:wow_shopping/backend/backend.dart';
+import 'package:wow_shopping/features/wishlist/bloc/bloc/wishlist_page_bloc.dart';
 import 'package:wow_shopping/features/wishlist/widgets/wishlist_item.dart';
 import 'package:wow_shopping/models/product_item.dart';
 import 'package:wow_shopping/widgets/app_button.dart';
@@ -9,58 +11,63 @@ import 'package:wow_shopping/widgets/common.dart';
 import 'package:wow_shopping/widgets/top_nav_bar.dart';
 
 @immutable
-class WishlistPage extends StatefulWidget {
+class WishlistPage extends StatelessWidget {
   const WishlistPage({super.key});
 
   @override
-  State<WishlistPage> createState() => _WishlistPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => WishlistPageBloc(context.wishlistRepo),
+      child: const WishlistPageView(),
+    );
+  }
 }
 
-class _WishlistPageState extends State<WishlistPage> {
-  var _wishlistItems = <ProductItem>[];
-  final _selectedItems = <String>{};
+class WishlistPageView extends StatelessWidget {
+  const WishlistPageView({super.key});
+  // final _wishlistItems = <ProductItem>[];
+  // final _selectedItems = <String>{};
 
-  bool isSelected(ProductItem item) {
-    return _selectedItems.contains(item.id);
-  }
+  // bool isSelected(ProductItem item) {
+  //   return _selectedItems.contains(item.id);
+  // }
 
-  void setSelected(ProductItem item, bool selected) {
-    setState(() {
-      if (selected) {
-        _selectedItems.add(item.id);
-      } else {
-        _selectedItems.remove(item.id);
-      }
-    });
-  }
+  // void setSelected(ProductItem item, bool selected) {
+  //   setState(() {
+  //     if (selected) {
+  //       _selectedItems.add(item.id);
+  //     } else {
+  //       _selectedItems.remove(item.id);
+  //     }
+  //   });
+  // }
 
-  void toggleSelectAll() {
-    final allIds = _wishlistItems.map((el) => el.id).toList();
-    setState(() {
-      if (_selectedItems.containsAll(allIds)) {
-        _selectedItems.clear();
-      } else {
-        _selectedItems.addAll(allIds);
-      }
-    });
-  }
+  // void toggleSelectAll() {
+  //   final allIds = _wishlistItems.map((el) => el.id).toList();
+  //   setState(() {
+  //     if (_selectedItems.containsAll(allIds)) {
+  //       _selectedItems.clear();
+  //     } else {
+  //       _selectedItems.addAll(allIds);
+  //     }
+  //   });
+  // }
 
-  void _removeSelected() {
-    setState(() {
-      for (final selected in _selectedItems) {
-        wishlistRepo.removeToWishlist(selected);
-      }
-      _selectedItems.clear();
-    });
-  }
+  // void _removeSelected() {
+  //   setState(() {
+  //     for (final selected in _selectedItems) {
+  //       wishlistRepo.removeToWishlist(selected);
+  //     }
+  //     _selectedItems.clear();
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
       child: Material(
-        child: WishlistConsumer(
-          builder: (BuildContext context, List<ProductItem> wishlist) {
-            _wishlistItems = wishlist;
+        child: BlocBuilder<WishlistPageBloc, WishlistPageState>(
+          builder: (BuildContext context, WishlistPageState state) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -68,7 +75,9 @@ class _WishlistPageState extends State<WishlistPage> {
                   title: const Text('Wishlist'),
                   actions: [
                     TextButton(
-                      onPressed: toggleSelectAll,
+                      onPressed: () => context
+                          .read<WishlistPageBloc>() //
+                          .add(ToggleSelectAll()),
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,
                       ),
@@ -82,9 +91,9 @@ class _WishlistPageState extends State<WishlistPage> {
                     removeTop: true,
                     child: ListView.builder(
                       padding: verticalPadding12,
-                      itemCount: _wishlistItems.length,
+                      itemCount: state.wishlistItems.length,
                       itemBuilder: (BuildContext context, int index) {
-                        final item = _wishlistItems[index];
+                        final item = state.wishlistItems[index];
                         return Padding(
                           padding: verticalPadding12,
                           child: WishlistItem(
@@ -92,8 +101,13 @@ class _WishlistPageState extends State<WishlistPage> {
                             onPressed: (item) {
                               // FIXME: navigate to product details
                             },
-                            selected: isSelected(item),
-                            onToggleSelection: setSelected,
+                            selected: context
+                                .read<WishlistPageBloc>() //
+                                .isSelected(item),
+                            onToggleSelection: (item, isToggled) => context
+                                .read<WishlistPageBloc>() //
+                                .add(SetSelected(
+                                    item: item, selected: isToggled)), //
                           ),
                         );
                       },
@@ -106,7 +120,7 @@ class _WishlistPageState extends State<WishlistPage> {
                   alignment: Alignment.topCenter,
                   child: Align(
                     alignment: Alignment.topCenter,
-                    heightFactor: _selectedItems.isEmpty ? 0.0 : 1.0,
+                    heightFactor: state.selectedItems.isEmpty ? 0.0 : 1.0,
                     child: DecoratedBox(
                       decoration: const BoxDecoration(
                         color: appLightGreyColor,
@@ -120,7 +134,9 @@ class _WishlistPageState extends State<WishlistPage> {
                           children: [
                             Expanded(
                               child: AppButton(
-                                onPressed: _removeSelected,
+                                onPressed: () => context
+                                    .read<WishlistPageBloc>() //
+                                    .add(DeleteSelected()),
                                 label: 'Remove',
                                 iconAsset: Assets.iconRemove,
                               ),
@@ -158,14 +174,16 @@ class WishlistConsumer extends StatelessWidget {
     required this.builder,
   });
 
-  final Widget Function(BuildContext context, List<ProductItem> wishlist) builder;
+  final Widget Function(BuildContext context, List<ProductItem> wishlist)
+      builder;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<ProductItem>>(
       initialData: context.wishlistRepo.currentWishlistItems,
       stream: context.wishlistRepo.streamWishlistItems,
-      builder: (BuildContext context, AsyncSnapshot<List<ProductItem>> snapshot) {
+      builder:
+          (BuildContext context, AsyncSnapshot<List<ProductItem>> snapshot) {
         return builder(context, snapshot.requireData);
       },
     );
