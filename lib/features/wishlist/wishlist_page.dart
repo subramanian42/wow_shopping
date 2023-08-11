@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wow_shopping/app/assets.dart';
 import 'package:wow_shopping/app/theme.dart';
 import 'package:wow_shopping/backend/backend.dart';
-import 'package:wow_shopping/features/wishlist/bloc/bloc/wishlist_page_bloc.dart';
+import 'package:wow_shopping/features/wishlist/bloc/wishlist_page_bloc.dart';
 import 'package:wow_shopping/features/wishlist/widgets/wishlist_item.dart';
 import 'package:wow_shopping/models/product_item.dart';
 import 'package:wow_shopping/widgets/app_button.dart';
@@ -25,42 +25,6 @@ class WishlistPage extends StatelessWidget {
 
 class WishlistPageView extends StatelessWidget {
   const WishlistPageView({super.key});
-  // final _wishlistItems = <ProductItem>[];
-  // final _selectedItems = <String>{};
-
-  // bool isSelected(ProductItem item) {
-  //   return _selectedItems.contains(item.id);
-  // }
-
-  // void setSelected(ProductItem item, bool selected) {
-  //   setState(() {
-  //     if (selected) {
-  //       _selectedItems.add(item.id);
-  //     } else {
-  //       _selectedItems.remove(item.id);
-  //     }
-  //   });
-  // }
-
-  // void toggleSelectAll() {
-  //   final allIds = _wishlistItems.map((el) => el.id).toList();
-  //   setState(() {
-  //     if (_selectedItems.containsAll(allIds)) {
-  //       _selectedItems.clear();
-  //     } else {
-  //       _selectedItems.addAll(allIds);
-  //     }
-  //   });
-  // }
-
-  // void _removeSelected() {
-  //   setState(() {
-  //     for (final selected in _selectedItems) {
-  //       wishlistRepo.removeToWishlist(selected);
-  //     }
-  //     _selectedItems.clear();
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {

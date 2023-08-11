@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wow_shopping/features/connection_monitor/bloc/bloc/connection_monitor_bloc.dart';
+import 'package:wow_shopping/features/connection_monitor/bloc/connection_monitor_bloc.dart';
 import 'package:wow_shopping/widgets/common.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 

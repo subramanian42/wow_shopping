@@ -8,9 +8,9 @@ final class TopSellingInitial extends TopSellingState {}
 final class TopSellingLoading extends TopSellingState {}
 
 final class TopSellingLoaded extends TopSellingState {
-  final List<ProductItem> items;
+  final List<ProductItem> products;
 
-  TopSellingLoaded({required this.items});
+  TopSellingLoaded({required this.products});
 }
 
 final class TopSellingFailure extends TopSellingState {}

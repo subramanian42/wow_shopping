@@ -23,7 +23,7 @@ class TopSellingBloc extends Bloc<TopSellingEvent, TopSellingState> {
     emit(TopSellingLoading());
     try {
       final topSellingProducts = await _productsRepo.fetchTopSelling();
-      emit(TopSellingLoaded(items: topSellingProducts));
+      emit(TopSellingLoaded(products: topSellingProducts));
     } catch (_) {
       emit(TopSellingFailure());
     }

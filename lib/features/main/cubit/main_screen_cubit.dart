@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
-import 'package:wow_shopping/features/main/main_screen.dart';
+import 'package:wow_shopping/models/nav_item.dart';
 
 part 'main_screen_cubit_state.dart';
 

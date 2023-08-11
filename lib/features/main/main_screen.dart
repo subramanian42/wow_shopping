@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wow_shopping/features/connection_monitor/connection_monitor.dart';
-import 'package:wow_shopping/features/main/cubit/cubit/main_screen_cubit.dart';
+import 'package:wow_shopping/features/main/cubit/main_screen_cubit.dart';
 import 'package:wow_shopping/features/main/widgets/bottom_nav_bar.dart';
 export 'package:wow_shopping/models/nav_item.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 @immutable
 class MainScreen extends StatelessWidget {
