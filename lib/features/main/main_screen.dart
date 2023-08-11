@@ -9,9 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
-  // static MainScreenState of(BuildContext context) {
-  //   return context.findAncestorStateOfType<MainScreenState>()!;
-  // }
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
