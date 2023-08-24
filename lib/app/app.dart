@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:wow_shopping/backend/backend_provider.dart';
 import 'package:wow_shopping/app/config.dart';
@@ -36,6 +37,11 @@ class _ShopWowAppState extends ConsumerState<ShopWowApp> {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     Intl.defaultLocale = PlatformDispatcher.instance.locale.toLanguageTag();
+    _loadApp();
+  }
+
+  Future<void> _loadApp() async {
+    await initializeDateFormatting();
   }
 
   @override

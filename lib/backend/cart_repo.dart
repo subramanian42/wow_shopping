@@ -68,8 +68,9 @@ class CartRepo {
 
   void addToCart(ProductItem item,
       {ProductOption option = ProductOption.none}) {
-    if (cartContainsProduct(item)) {
-      // FIXME: increase quantity
+    final existingItem = cartItemForProduct(item);
+    if (existingItem != CartItem.none) {
+      updateQuantity(item.id, existingItem.quantity + 1);
       return;
     }
     _storage = _storage.copyWith(
@@ -78,11 +79,27 @@ class CartRepo {
         CartItem(
           product: item,
           option: option,
-          deliveryFee: Decimal.zero, // FIXME: where from?
-          deliveryDate: DateTime.now(), // FIXME: where from?
+          deliveryFee: Decimal.zero,
+          // FIXME: where from?
+          deliveryDate: DateTime.now(),
+          // FIXME: where from?
           quantity: 1,
         ),
       },
+    );
+    _emitCart();
+    _saveCart();
+  }
+
+  void updateQuantity(String productId, int quantity) {
+    _storage = _storage.copyWith(
+      items: _storage.items.map((item) {
+        if (item.product.id == productId) {
+          return item.copyWith(quantity: quantity);
+        } else {
+          return item;
+        }
+      }),
     );
     _emitCart();
     _saveCart();
