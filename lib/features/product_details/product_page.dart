@@ -8,6 +8,7 @@ import 'package:wow_shopping/widgets/app_button.dart';
 import 'package:wow_shopping/widgets/common.dart';
 import 'package:wow_shopping/widgets/content_heading.dart';
 import 'package:wow_shopping/widgets/product_card.dart';
+import 'package:wow_shopping/widgets/product_image.dart';
 import 'package:wow_shopping/widgets/sliver_expansion_tile.dart';
 import 'package:wow_shopping/widgets/wishlist_button.dart';
 
@@ -57,7 +58,10 @@ class ProductPage extends ConsumerWidget {
           slivers: [
             _SliverProductHeader(item: item),
             _SliverProductTitle(item: item),
-            _SliverProductPhotoGallery(item: item),
+            _SliverProductPhotoGallery(
+              initialImageIndex: 0,
+              item: item,
+            ),
             _SliverProductSizeSelector(item: item),
             const _SliverProductInfoTileHeader(
               section: 'description',
@@ -309,9 +313,11 @@ class _SmallProductRating extends StatelessWidget {
 @immutable
 class _SliverProductPhotoGallery extends StatefulWidget {
   const _SliverProductPhotoGallery({
+    required this.initialImageIndex,
     required this.item,
   });
 
+  final int initialImageIndex;
   final ProductItem item;
 
   @override
@@ -321,16 +327,16 @@ class _SliverProductPhotoGallery extends StatefulWidget {
 
 class _SliverProductPhotoGalleryState
     extends State<_SliverProductPhotoGallery> {
-  late String _selectedPhoto;
+  late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
-    _selectedPhoto = widget.item.primaryPhoto;
+    _selectedIndex = widget.initialImageIndex;
   }
 
-  void _onPhotoPressed(String photo) {
-    setState(() => _selectedPhoto = photo);
+  void _onPhotoPressed(int index) {
+    setState(() => _selectedIndex = index);
   }
 
   @override
@@ -349,9 +355,10 @@ class _SliverProductPhotoGalleryState
                   Positioned.fill(
                     child: ClipRRect(
                       borderRadius: appButtonRadius,
-                      child: Image.asset(
-                        _selectedPhoto,
-                        fit: BoxFit.cover,
+                      child: ProductImage(
+                        imageIndex: _selectedIndex,
+                        inkEnabled: false,
+                        item: widget.item,
                       ),
                     ),
                   ),
@@ -368,13 +375,13 @@ class _SliverProductPhotoGalleryState
               padding: leftPadding24 + rightPadding8,
               itemCount: widget.item.photos.length,
               itemBuilder: (BuildContext context, int index) {
-                final photo = widget.item.photos[index];
                 return Padding(
                   padding: rightPadding16,
                   child: _PhotoGalleryItem(
-                    onPhotoPressed: _onPhotoPressed,
-                    photo: photo,
-                    selected: _selectedPhoto == photo,
+                    onPhotoPressed: () => _onPhotoPressed(index),
+                    item: widget.item,
+                    index: index,
+                    selected: _selectedIndex == index,
                   ),
                 );
               },
@@ -391,12 +398,14 @@ class _SliverProductPhotoGalleryState
 class _PhotoGalleryItem extends StatelessWidget {
   const _PhotoGalleryItem({
     required this.onPhotoPressed,
-    required this.photo,
+    required this.index,
+    required this.item,
     required this.selected,
   });
 
-  final ValueChanged<String> onPhotoPressed;
-  final String photo;
+  final VoidCallback onPhotoPressed;
+  final int index;
+  final ProductItem item;
   final bool selected;
 
   @override
@@ -404,13 +413,13 @@ class _PhotoGalleryItem extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1.0,
       child: InkWell(
-        onTap: () => onPhotoPressed(photo),
+        onTap: onPhotoPressed,
         customBorder: const RoundedRectangleBorder(
           borderRadius: appButtonRadius,
         ),
-        child: Ink.image(
-          image: AssetImage(photo),
-          fit: BoxFit.cover,
+        child: ProductImage(
+          imageIndex: index,
+          item: item,
         ),
       ),
     );
