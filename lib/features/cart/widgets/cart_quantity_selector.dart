@@ -26,7 +26,7 @@ class _CartQuantitySelectorState extends ConsumerState<CartQuantitySelector> {
   late TextEditingController _quantityController;
   late FocusNode _quantityFocus;
 
-  int get quantity => int.tryParse(_quantityController.text) ?? 0;
+  int get quantity => int.tryParse(_quantityController.text.trim()) ?? 0;
 
   @override
   void initState() {
@@ -47,7 +47,11 @@ class _CartQuantitySelectorState extends ConsumerState<CartQuantitySelector> {
   }
 
   void _onQuantityChanged() {
-    ref.read(cartRepoProvider).updateQuantity(widget.item.product.id, quantity);
+    if (_quantityController.text.trim().isNotEmpty) {
+      ref
+          .read(cartRepoProvider)
+          .updateQuantity(widget.item.product.id, quantity);
+    }
   }
 
   void _onMinusPressed() {
@@ -65,12 +69,10 @@ class _CartQuantitySelectorState extends ConsumerState<CartQuantitySelector> {
 
   void _updateQuantity(int value) {
     final text = value.toString();
-    final selection = _quantityController.selection;
     _quantityController.value = _quantityController.value.copyWith(
       text: text,
-      selection: selection.copyWith(
-        baseOffset: math.min(selection.baseOffset, text.length),
-        extentOffset: math.min(selection.extentOffset, text.length),
+      selection: TextSelection.fromPosition(
+        TextPosition(offset: text.length),
       ),
     );
   }
@@ -103,9 +105,11 @@ class _CartQuantitySelectorState extends ConsumerState<CartQuantitySelector> {
             children: [
               InkWell(
                 onTap: _onMinusPressed,
-                focusNode: _quantityFocus,
                 child: Padding(
-                  padding: leftPadding12 + verticalPadding4 + verticalPadding2,
+                  padding: leftPadding12 +
+                      rightPadding8 +
+                      verticalPadding4 +
+                      verticalPadding2,
                   child: ValueListenableBuilder(
                     valueListenable: _quantityController,
                     builder: (BuildContext context, TextEditingValue value,
@@ -152,9 +156,11 @@ class _CartQuantitySelectorState extends ConsumerState<CartQuantitySelector> {
               ),
               InkWell(
                 onTap: _onAddPressed,
-                focusNode: _quantityFocus,
                 child: Padding(
-                  padding: rightPadding12 + verticalPadding4 + verticalPadding2,
+                  padding: leftPadding8 +
+                      rightPadding12 +
+                      verticalPadding4 +
+                      verticalPadding2,
                   child: AppIcon(
                     iconAsset: Assets.iconAdd,
                     color: appTheme.appColor,
