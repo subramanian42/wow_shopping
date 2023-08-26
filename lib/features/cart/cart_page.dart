@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wow_shopping/app/assets.dart';
+
 import 'package:wow_shopping/app/theme.dart';
-import 'package:wow_shopping/backend/backend.dart';
+import 'package:wow_shopping/backend/cart_repo.dart';
+
 import 'package:wow_shopping/models/cart_item.dart';
 import 'package:wow_shopping/utils/formatting.dart';
 import 'package:wow_shopping/widgets/app_button.dart';
@@ -9,20 +12,21 @@ import 'package:wow_shopping/widgets/common.dart';
 import 'package:wow_shopping/widgets/top_nav_bar.dart';
 
 @immutable
-class CartPage extends StatefulWidget {
+class CartPage extends ConsumerStatefulWidget {
   const CartPage({super.key});
 
   @override
-  State<CartPage> createState() => _CartPageState();
+  ConsumerState<CartPage> createState() => _CartPageState();
 }
 
-class _CartPageState extends State<CartPage> {
+class _CartPageState extends ConsumerState<CartPage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<CartItem>>(
-        initialData: cartRepo.currentCartItems,
-        stream: cartRepo.streamCartItems,
-        builder: (BuildContext context, AsyncSnapshot<List<CartItem>> snapshot) {
+        initialData: ref.read(cartRepoProvider).currentCartItems,
+        stream: ref.read(cartRepoProvider).streamCartItems,
+        builder:
+            (BuildContext context, AsyncSnapshot<List<CartItem>> snapshot) {
           final items = snapshot.requireData;
           return SizedBox.expand(
             child: Material(
@@ -107,7 +111,7 @@ class _DeliveryAddressCta extends StatelessWidget {
 }
 
 @immutable
-class _CartItemView extends StatelessWidget {
+class _CartItemView extends ConsumerWidget {
   const _CartItemView({
     required super.key,
     required this.item,
@@ -116,7 +120,7 @@ class _CartItemView extends StatelessWidget {
   final CartItem item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: bottomPadding12 + horizontalPadding12,
       child: Column(
@@ -141,9 +145,8 @@ class _CartItemView extends StatelessWidget {
           Padding(
             padding: allPadding8 - topPadding8,
             child: AppButton(
-              onPressed: () {
-                context.cartRepo.removeToCart(item.product.id);
-              },
+              onPressed: () =>
+                  ref.read(cartRepoProvider).removeToCart(item.product.id),
               iconAsset: Assets.iconRemove,
               label: 'Remove',
             ),
