@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:decimal/decimal.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wow_shopping/models/cart_item.dart';
 import 'package:wow_shopping/models/cart_storage.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -11,15 +12,20 @@ import 'package:wow_shopping/models/product_item.dart';
 import 'package:wow_shopping/backend/wishlist_repo.dart';
 
 /// FIXME: Very similar to the [WishlistRepo] and should be refactored out and simplified
-class CartRepo {
-  CartRepo._(this._file, this._storage);
 
-  final File _file;
-  CartStorage _storage;
+final cartRepoProvider = Provider<CartRepo>((ref) {
+  return CartRepo._(ref);
+});
+
+class CartRepo {
+  CartRepo._(this.ref);
+  Ref ref;
+  late final File _file;
+  late CartStorage _storage;
   late StreamController<List<CartItem>> _cartController;
   Timer? _saveTimer;
 
-  static Future<CartRepo> create() async {
+  Future<void> create() async {
     CartStorage storage;
     try {
       final dir = await path_provider.getApplicationDocumentsDirectory();
@@ -28,20 +34,18 @@ class CartRepo {
         storage = CartStorage.fromJson(
           json.decode(await file.readAsString()),
         );
+        _storage = storage;
       } else {
-        storage = CartStorage.empty;
+        _storage = CartStorage.empty;
       }
-      return CartRepo._(file, storage)..init();
+
+      _cartController = StreamController<List<CartItem>>.broadcast(
+        onListen: () => _emitCart(),
+      );
     } catch (error, stackTrace) {
       print('$error\n$stackTrace'); // Send to server?
       rethrow;
     }
-  }
-
-  void init() {
-    _cartController = StreamController<List<CartItem>>.broadcast(
-      onListen: () => _emitCart(),
-    );
   }
 
   void _emitCart() {
@@ -54,14 +58,16 @@ class CartRepo {
 
   CartItem cartItemForProduct(ProductItem item) {
     return _storage.items //
-        .firstWhere((el) => el.product.id == item.id, orElse: () => CartItem.none);
+        .firstWhere((el) => el.product.id == item.id,
+            orElse: () => CartItem.none);
   }
 
   bool cartContainsProduct(ProductItem item) {
     return cartItemForProduct(item) != CartItem.none;
   }
 
-  void addToCart(ProductItem item, {ProductOption option = ProductOption.none}) {
+  void addToCart(ProductItem item,
+      {ProductOption option = ProductOption.none}) {
     if (cartContainsProduct(item)) {
       // FIXME: increase quantity
       return;

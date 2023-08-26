@@ -1,22 +1,33 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wow_shopping/backend/product_repo.dart';
+
 import 'package:wow_shopping/models/product_item.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:path/path.dart' as path;
 import 'package:wow_shopping/models/wishlist_storage.dart';
 
-class WishlistRepo {
-  WishlistRepo._(this._productsRepo, this._file, this._wishlist);
+final wishlistRepoProvider = Provider<WishlistRepo>((ref) {
+  return WishlistRepo._(ref);
+});
 
-  final ProductsRepo _productsRepo;
-  final File _file;
-  WishlistStorage _wishlist;
+// Provides state
+final wishlistStorageState = StateProvider<WishlistStorage>((ref) {
+  return const WishlistStorage(items: {});
+});
+
+class WishlistRepo {
+  WishlistRepo._(this.ref);
+
+  final Ref ref;
+  late final File _file;
+  late WishlistStorage _wishlist;
   late StreamController<List<ProductItem>> _wishlistController;
   Timer? _saveTimer;
 
-  static Future<WishlistRepo> create(ProductsRepo productsRepo) async {
+  Future<void> create() async {
     WishlistStorage wishlist;
     try {
       final dir = await path_provider.getApplicationDocumentsDirectory();
@@ -25,20 +36,17 @@ class WishlistRepo {
         wishlist = WishlistStorage.fromJson(
           json.decode(await file.readAsString()),
         );
+        _wishlist = wishlist;
       } else {
-        wishlist = WishlistStorage.empty;
+        _wishlist = WishlistStorage.empty;
       }
-      return WishlistRepo._(productsRepo, file, wishlist)..init();
+      _wishlistController = StreamController<List<ProductItem>>.broadcast(
+        onListen: () => _emitWishlist(),
+      );
     } catch (error, stackTrace) {
       print('$error\n$stackTrace'); // Send to server?
       rethrow;
     }
-  }
-
-  void init() {
-    _wishlistController = StreamController<List<ProductItem>>.broadcast(
-      onListen: () => _emitWishlist(),
-    );
   }
 
   void _emitWishlist() {
@@ -46,9 +54,10 @@ class WishlistRepo {
   }
 
   List<ProductItem> get currentWishlistItems =>
-      _wishlist.items.map(_productsRepo.findProduct).toList();
+      _wishlist.items.map((ref.read(productRepoProvider)).findProduct).toList();
 
-  Stream<List<ProductItem>> get streamWishlistItems => _wishlistController.stream;
+  Stream<List<ProductItem>> get streamWishlistItems =>
+      _wishlistController.stream;
 
   bool isInWishlist(ProductItem item) {
     return _wishlist.items.contains(item.id);
