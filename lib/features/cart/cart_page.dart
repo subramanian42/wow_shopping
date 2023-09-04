@@ -31,7 +31,6 @@ class _CartPageState extends ConsumerState<CartPage> {
   final _cartPageKey = GlobalKey();
   final _checkoutPanelKey = GlobalKey();
   double _cartBottomInset = 0;
-  double _checkoutPanelHeight = 0;
 
   @override
   void initState() {
@@ -43,13 +42,6 @@ class _CartPageState extends ConsumerState<CartPage> {
       final bottom = cartBox.localToGlobal(Offset(0.0, cartBox.size.height));
       final screenHeight = (view.physicalSize / view.devicePixelRatio).height;
       _cartBottomInset = screenHeight - bottom.dy;
-      final panelBox =
-          _checkoutPanelKey.currentContext!.findRenderObject() as RenderBox;
-      if (mounted) {
-        setState(() {
-          _checkoutPanelHeight = panelBox.size.height;
-        });
-      }
     });
   }
 
