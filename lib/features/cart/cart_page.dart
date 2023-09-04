@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart' show PlatformDispatcher;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,58 +46,52 @@ class _CartPageState extends ConsumerState<CartPage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<CartItem>>(
-      initialData: ref.read(cartRepoProvider).currentCartItems,
-      stream: ref.read(cartRepoProvider).streamCartItems,
-      builder: (BuildContext context, AsyncSnapshot<List<CartItem>> snapshot) {
-        final items = snapshot.requireData;
-        return SizedBox.expand(
-          child: Material(
-            key: _cartPageKey,
-            child: ChildBuilder(
-              builder: (BuildContext context, Widget child) {
-                final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: math.max(0.0, keyboardHeight - _cartBottomInset),
-                  ),
-                  child: child,
-                );
-              },
-              child: Column(
-                children: [
-                  Expanded(
-                    child: CustomScrollView(
-                      slivers: [
-                        SliverTopNavBar(
-                          title: items.isEmpty
-                              ? const Text('No items in your cart')
-                              : Text('${items.length} items in your cart'),
-                          pinned: true,
-                          floating: true,
-                        ),
-                        const SliverToBoxAdapter(
-                          child: _DeliveryAddressCta(
-                              // FIXME: onChangeAddress ?
-                              ),
-                        ),
-                        for (final item in items) //
-                          SliverCartItemView(
-                            key: Key(item.product.id),
-                            item: item,
-                          ),
-                      ],
-                    ),
-                  ),
-                  CheckoutPanel(
-                    key: _checkoutPanelKey,
-                  ),
-                ],
+    final items = ref.watch(cartStorageProvider).items;
+    return SizedBox.expand(
+      child: Material(
+        key: _cartPageKey,
+        child: ChildBuilder(
+          builder: (BuildContext context, Widget child) {
+            final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: math.max(0.0, keyboardHeight - _cartBottomInset),
               ),
-            ),
+              child: child,
+            );
+          },
+          child: Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverTopNavBar(
+                      title: items.isEmpty
+                          ? const Text('No items in your cart')
+                          : Text('${items.length} items in your cart'),
+                      pinned: true,
+                      floating: true,
+                    ),
+                    const SliverToBoxAdapter(
+                      child: _DeliveryAddressCta(
+                          // FIXME: onChangeAddress ?
+                          ),
+                    ),
+                    for (final item in items) //
+                      SliverCartItemView(
+                        key: Key(item.product.id),
+                        item: item,
+                      ),
+                  ],
+                ),
+              ),
+              CheckoutPanel(
+                key: _checkoutPanelKey,
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
@@ -159,34 +152,29 @@ class CheckoutPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return StreamBuilder<Decimal>(
-        initialData: ref.read(cartRepoProvider).currentCartTotal,
-        stream: ref.read(cartRepoProvider).streamCartTotal,
-        builder: (BuildContext context, AsyncSnapshot<Decimal> snapshot) {
-          final total = snapshot.requireData;
-          return AppPanel(
-            padding: horizontalPadding24 + topPadding12 + bottomPadding24,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    final total = ref.watch(cartTotalProvider);
+    return AppPanel(
+      padding: horizontalPadding24 + topPadding12 + bottomPadding24,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DefaultTextStyle.merge(
+            style: const TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.w700,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                DefaultTextStyle.merge(
-                  style: const TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Order amount:'),
-                      Text(formatCurrency(total)),
-                    ],
-                  ),
-                ),
+                const Text('Order amount:'),
+                Text(formatCurrency(total)),
               ],
             ),
-          );
-        });
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -17,12 +17,17 @@ final cartRepoProvider = Provider<CartRepo>((ref) {
   return CartRepo._(ref);
 });
 
+final cartStorageProvider = StateProvider.autoDispose<CartStorage>(
+    (ref) => const CartStorage(items: []));
+final cartTotalProvider =
+    StateProvider.autoDispose<Decimal>((ref) => Decimal.zero);
+
 class CartRepo {
   CartRepo._(this.ref);
   Ref ref;
   late final File _file;
   late CartStorage _storage;
-  late StreamController<List<CartItem>> _cartController;
+  // late StreamController<List<CartItem>> _cartController;
   Timer? _saveTimer;
 
   Future<void> create() async {
@@ -38,27 +43,31 @@ class CartRepo {
       } else {
         _storage = CartStorage.empty;
       }
-
-      _cartController = StreamController<List<CartItem>>.broadcast(
-        onListen: () => _emitCart(),
-      );
+      ref.read(cartStorageProvider.notifier).update((state) => _storage);
+      // _cartController = StreamController<List<CartItem>>.broadcast(
+      //   onListen: () => _emitCart(),
+      // );
+      ref
+          .read(cartTotalProvider.notifier)
+          .update((state) => _calculateCartTotal(_storage.items));
     } catch (error, stackTrace) {
       print('$error\n$stackTrace'); // Send to server?
       rethrow;
     }
   }
 
-  void _emitCart() {
-    _cartController.add(currentCartItems);
-  }
+  // void _emitCart() {
+  //   _cartController.add(currentCartItems);
+  // }
 
   List<CartItem> get currentCartItems => _storage.items;
 
-  Stream<List<CartItem>> get streamCartItems => _cartController.stream;
+  // Stream<List<CartItem>> get streamCartItems => _cartController.stream;
 
   Decimal get currentCartTotal => _calculateCartTotal(currentCartItems);
 
-  Stream<Decimal> get streamCartTotal => streamCartItems.map(_calculateCartTotal);
+  // Stream<Decimal> get streamCartTotal =>
+  //     streamCartItems.map(_calculateCartTotal);
 
   Decimal _calculateCartTotal(List<CartItem> items) {
     return items.fold<Decimal>(Decimal.zero, (prev, el) => prev + el.total);
@@ -95,7 +104,11 @@ class CartRepo {
         ),
       },
     );
-    _emitCart();
+    ref.read(cartStorageProvider.notifier).update((state) => _storage);
+    ref
+        .read(cartTotalProvider.notifier)
+        .update((state) => _calculateCartTotal(_storage.items));
+    // _emitCart();
     _saveCart();
   }
 
@@ -109,7 +122,12 @@ class CartRepo {
         }
       }),
     );
-    _emitCart();
+    // _emitCart();
+
+    ref.read(cartStorageProvider.notifier).update((state) => _storage);
+    ref
+        .read(cartTotalProvider.notifier)
+        .update((state) => _calculateCartTotal(_storage.items));
     _saveCart();
   }
 
@@ -117,7 +135,11 @@ class CartRepo {
     _storage = _storage.copyWith(
       items: _storage.items.where((el) => el.product.id != productId),
     );
-    _emitCart();
+    // _emitCart();
+    ref.read(cartStorageProvider.notifier).update((state) => _storage);
+    ref
+        .read(cartTotalProvider.notifier)
+        .update((state) => _calculateCartTotal(_storage.items));
     _saveCart();
   }
 
