@@ -40,7 +40,7 @@ class WishlistRepo {
         wishlistStorage = WishlistStorage.empty;
       }
       ref
-          .watch(wishlistStorageProvider.notifier)
+          .read(wishlistStorageProvider.notifier)
           .update((state) => wishlistStorage);
     } catch (error, stackTrace) {
       print('$error\n$stackTrace'); // Send to server?
