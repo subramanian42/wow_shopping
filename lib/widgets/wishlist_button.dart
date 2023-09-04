@@ -31,23 +31,18 @@ class _WishlistButtonState extends ConsumerState<WishlistButton> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
-      initialData: ref.read(wishlistRepoProvider).isInWishlist(widget.item),
-      stream: ref.read(wishlistRepoProvider).streamIsInWishlist(widget.item),
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-        final value = snapshot.requireData;
-        return IconButton(
-          onPressed: () => _onTogglePressed(!value),
-          icon: AppIcon(
-            iconAsset: value //
-                ? Assets.iconHeartFilled
-                : Assets.iconHeartEmpty,
-            color: value //
-                ? AppTheme.of(context).appColor
-                : const Color(0xFFD0D0D0),
-          ),
-        );
-      },
+    final value =
+        ref.watch(wishlistStorageProvider).items.contains(widget.item.id);
+    return IconButton(
+      onPressed: () => _onTogglePressed(!value),
+      icon: AppIcon(
+        iconAsset: value //
+            ? Assets.iconHeartFilled
+            : Assets.iconHeartEmpty,
+        color: value //
+            ? AppTheme.of(context).appColor
+            : const Color(0xFFD0D0D0),
+      ),
     );
   }
 }

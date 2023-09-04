@@ -24,7 +24,7 @@ class WishlistRepo {
   final Ref ref;
   late final File _file;
 
-  late StreamController<List<ProductItem>> _wishlistController;
+  // late StreamController<List<ProductItem>> _wishlistController;
   Timer? _saveTimer;
 
   Future<void> create() async {
@@ -40,20 +40,13 @@ class WishlistRepo {
         wishlistStorage = WishlistStorage.empty;
       }
       ref
-          .read(wishlistStorageProvider.notifier)
+          .watch(wishlistStorageProvider.notifier)
           .update((state) => wishlistStorage);
-      // _wishlistController = StreamController<List<ProductItem>>.broadcast(
-      //   onListen: () => _emitWishlist(),
-      // );
     } catch (error, stackTrace) {
       print('$error\n$stackTrace'); // Send to server?
       rethrow;
     }
   }
-
-  // void _emitWishlist() {
-  //   _wishlistController.add(currentWishlistItems);
-  // }
 
   List<ProductItem> get currentWishlistItems => ref
       .read(wishlistStorageProvider)
@@ -61,23 +54,8 @@ class WishlistRepo {
       .map(ref.read(productRepoProvider).findProduct)
       .toList();
 
-  Stream<List<ProductItem>> get streamWishlistItems =>
-      _wishlistController.stream;
-
   bool isInWishlist(ProductItem item) {
     return ref.read(wishlistStorageProvider).items.contains(item.id);
-  }
-
-  Stream<bool> streamIsInWishlist(ProductItem item) async* {
-    bool last = isInWishlist(item);
-    yield last;
-    await for (final list in streamWishlistItems) {
-      final current = list.any((product) => product.id == item.id);
-      if (current != last) {
-        yield current;
-        last = current;
-      }
-    }
   }
 
   void addToWishlist(String productId) {
