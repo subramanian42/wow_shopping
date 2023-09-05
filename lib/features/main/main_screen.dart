@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 import 'package:wow_shopping/features/connection_monitor/connection_monitor.dart';
+import 'package:wow_shopping/features/main/notifier/bottom_nav_notifier.dart';
 import 'package:wow_shopping/features/main/widgets/bottom_nav_bar.dart';
 
 export 'package:wow_shopping/models/nav_item.dart';
 
 @immutable
-class MainScreen extends StatefulWidget {
+class MainScreen extends WatchingStatefulWidget {
   const MainScreen._();
 
   static Route<void> route() {
@@ -32,14 +34,16 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  NavItem _selected = NavItem.home;
+  // NavItem _selected = NavItem.home;
 
-  void gotoSection(NavItem item) {
-    setState(() => _selected = item);
-  }
+  // void gotoSection(NavItem item) {
+  //   setState(() => _selected = item);
+  // }
 
   @override
   Widget build(BuildContext context) {
+    final item = watchPropertyValue<BottomNavNotifier, NavItem>(
+        (BottomNavNotifier m) => m.item);
     return SizedBox.expand(
       child: Material(
         child: Column(
@@ -48,7 +52,7 @@ class MainScreenState extends State<MainScreen> {
             Expanded(
               child: ConnectionMonitor(
                 child: IndexedStack(
-                  index: _selected.index,
+                  index: item.index,
                   children: [
                     for (final item in NavItem.values) //
                       item.builder(),
@@ -57,8 +61,9 @@ class MainScreenState extends State<MainScreen> {
               ),
             ),
             BottomNavBar(
-              onNavItemPressed: gotoSection,
-              selected: _selected,
+              onNavItemPressed: (item) =>
+                  di<BottomNavNotifier>().updateItem = item,
+              selected: item,
             ),
           ],
         ),

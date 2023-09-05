@@ -4,13 +4,14 @@ import 'package:wow_shopping/backend/product_repo.dart';
 import 'package:wow_shopping/backend/product_repo_proxy.dart';
 import 'package:wow_shopping/backend/wishlist_repo.dart';
 import 'package:wow_shopping/backend/wishlist_repo_proxy.dart';
+import 'package:wow_shopping/features/main/notifier/bottom_nav_notifier.dart';
 
 import 'package:wow_shopping/features/product_details/models/product_manager.dart';
 import 'package:wow_shopping/utils/command_error_filters.dart';
 
 void setup() {
   di.registerSingleton(InteractionManager());
-
+  di.registerSingleton(BottomNavNotifier());
   di.registerSingletonAsync<ProductsRepo>(() => ProductsRepoProxy().init());
   di.registerSingletonAsync<WishlistRepo>(() => WishlistRepoProxy().init(),
       dependsOn: [ProductsRepo]);
