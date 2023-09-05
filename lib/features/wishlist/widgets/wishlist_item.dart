@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wow_shopping/app/assets.dart';
 import 'package:wow_shopping/app/theme.dart';
-import 'package:wow_shopping/models/product_item.dart';
+import 'package:wow_shopping/features/product_details/models/product_proxy.dart';
 import 'package:wow_shopping/widgets/app_icon.dart';
 import 'package:wow_shopping/widgets/common.dart';
 import 'package:wow_shopping/widgets/product_image.dart';
@@ -16,9 +16,9 @@ class WishlistItem extends StatelessWidget {
     this.selected,
   });
 
-  final ProductItem item;
-  final ValueChanged<ProductItem> onPressed;
-  final void Function(ProductItem item, bool value)? onToggleSelection;
+  final ProductProxy item;
+  final ValueChanged<ProductProxy> onPressed;
+  final void Function(ProductProxy item, bool value)? onToggleSelection;
   final bool? selected;
 
   @override
@@ -42,7 +42,7 @@ class WishlistItem extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   child: AspectRatio(
                     aspectRatio: 1.0,
-                    child: ProductImage(item: item),
+                    child: ProductImage(item: item.productItem),
                   ),
                 ),
               ),

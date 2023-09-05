@@ -11,7 +11,6 @@ import 'package:wow_shopping/backend/backend.dart';
 import 'package:wow_shopping/features/login/login_screen.dart';
 import 'package:wow_shopping/features/main/main_screen.dart';
 import 'package:wow_shopping/features/splash/splash_screen.dart';
-import 'package:wow_shopping/models/user.dart';
 
 export 'package:wow_shopping/app/config.dart';
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 import 'package:wow_shopping/app/theme.dart';
+import 'package:wow_shopping/features/product_details/models/product_proxy.dart';
 import 'package:wow_shopping/models/product_item.dart';
 import 'package:wow_shopping/widgets/app_button.dart';
 import 'package:wow_shopping/widgets/common.dart';
@@ -16,9 +18,9 @@ class ProductPage extends StatelessWidget {
     required this.item,
   });
 
-  final ProductItem item;
+  final ProductProxy item;
 
-  static Route<void> route(ProductItem item) {
+  static Route<void> route(ProductProxy item) {
     return PageRouteBuilder(
       settings: RouteSettings(name: '/products/${item.id}'),
       transitionDuration: const Duration(milliseconds: 300),
@@ -54,13 +56,13 @@ class ProductPage extends StatelessWidget {
         initialExpanded: const ['description'],
         child: CustomScrollView(
           slivers: [
-            _SliverProductHeader(item: item),
-            _SliverProductTitle(item: item),
+            _SliverProductHeader(item: item.productItem),
+            _SliverProductTitle(item: item.productItem),
             _SliverProductPhotoGallery(
               initialImageIndex: 0,
               item: item,
             ),
-            _SliverProductSizeSelector(item: item),
+            _SliverProductSizeSelector(item: item.productItem),
             const _SliverProductInfoTileHeader(
               section: 'description',
               title: 'Description',
@@ -102,7 +104,7 @@ class ProductPage extends StatelessWidget {
             const _SliverDivider(),
             //
             _SliverSimilarItems(
-              similarItems: context.productsRepo.cachedItems,
+              similarItems: di<ProductsRepo>().cachedItems,
             ),
             //
             const SliverSafeArea(
@@ -160,7 +162,8 @@ class _AppBarDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _AppBarDelegate oldDelegate) => false;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
       child: Ink(
         decoration: const BoxDecoration(
@@ -315,13 +318,15 @@ class _SliverProductPhotoGallery extends StatefulWidget {
   });
 
   final int initialImageIndex;
-  final ProductItem item;
+  final ProductProxy item;
 
   @override
-  State<_SliverProductPhotoGallery> createState() => _SliverProductPhotoGalleryState();
+  State<_SliverProductPhotoGallery> createState() =>
+      _SliverProductPhotoGalleryState();
 }
 
-class _SliverProductPhotoGalleryState extends State<_SliverProductPhotoGallery> {
+class _SliverProductPhotoGalleryState
+    extends State<_SliverProductPhotoGallery> {
   late int _selectedIndex;
 
   @override
@@ -353,7 +358,7 @@ class _SliverProductPhotoGalleryState extends State<_SliverProductPhotoGallery> 
                       child: ProductImage(
                         imageIndex: _selectedIndex,
                         inkEnabled: false,
-                        item: widget.item,
+                        item: widget.item.productItem,
                       ),
                     ),
                   ),
@@ -374,7 +379,7 @@ class _SliverProductPhotoGalleryState extends State<_SliverProductPhotoGallery> 
                   padding: rightPadding16,
                   child: _PhotoGalleryItem(
                     onPhotoPressed: () => _onPhotoPressed(index),
-                    item: widget.item,
+                    item: widget.item.productItem,
                     index: index,
                     selected: _selectedIndex == index,
                   ),
@@ -603,7 +608,7 @@ class _SliverSimilarItems extends StatelessWidget {
     required this.similarItems,
   });
 
-  final List<ProductItem> similarItems;
+  final List<ProductProxy> similarItems;
 
   @override
   Widget build(BuildContext context) {

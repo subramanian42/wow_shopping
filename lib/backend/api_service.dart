@@ -23,8 +23,9 @@ class ApiService {
     doNetworkRequest('/logout');
   }
 
-  Future<Map<String, dynamic>> doNetworkRequest(String path, {Map<String, dynamic>? body}) async {
-    final token = await tokenProvider();
+  Future<Map<String, dynamic>> doNetworkRequest(String path,
+      {Map<String, dynamic>? body}) async {
+    // final token = await tokenProvider();
     await Future.delayed(const Duration(seconds: 2));
     // FIXME: perform network request with token
     if (path == '/login') {

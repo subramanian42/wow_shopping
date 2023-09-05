@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wow_shopping/app/theme.dart';
+import 'package:wow_shopping/features/product_details/models/product_proxy.dart';
 import 'package:wow_shopping/features/product_details/product_page.dart';
 import 'package:wow_shopping/models/product_item.dart';
 import 'package:wow_shopping/widgets/common.dart';
@@ -14,7 +15,7 @@ class SliverProductCard extends StatelessWidget {
     this.onPressed,
   });
 
-  final ProductItem item;
+  final ProductProxy item;
   final ValueChanged<ProductItem>? onPressed;
 
   @override
@@ -38,7 +39,7 @@ class ProductCard extends StatelessWidget {
     this.onPressed,
   });
 
-  final ProductItem item;
+  final ProductProxy item;
   final ValueChanged<ProductItem>? onPressed;
 
   void _defaultOnPressed(BuildContext context) {
@@ -53,7 +54,7 @@ class ProductCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed != null //
-            ? () => onPressed!(item)
+            ? () => onPressed!(item.productItem)
             : () => _defaultOnPressed(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -64,7 +65,7 @@ class ProductCard extends StatelessWidget {
                 alignment: Alignment.topRight,
                 children: [
                   Positioned.fill(
-                    child: ProductImage(item: item),
+                    child: ProductImage(item: item.productItem),
                   ),
                   WishlistButton(item: item),
                 ],

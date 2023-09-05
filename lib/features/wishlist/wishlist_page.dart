@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 import 'package:wow_shopping/app/assets.dart';
+import 'package:wow_shopping/app/theme.dart';
 import 'package:wow_shopping/backend/backend.dart';
+import 'package:wow_shopping/features/product_details/models/product_proxy.dart';
 import 'package:wow_shopping/features/wishlist/widgets/wishlist_item.dart';
-import 'package:wow_shopping/models/product_item.dart';
+
 import 'package:wow_shopping/widgets/app_button.dart';
-import 'package:wow_shopping/widgets/app_panel.dart';
+
 import 'package:wow_shopping/widgets/common.dart';
 import 'package:wow_shopping/widgets/top_nav_bar.dart';
 
 @immutable
-class WishlistPage extends StatefulWidget {
+class WishlistPage extends StatefulWidget with WatchItStatefulWidgetMixin {
   const WishlistPage({super.key});
 
   @override
@@ -17,14 +20,14 @@ class WishlistPage extends StatefulWidget {
 }
 
 class _WishlistPageState extends State<WishlistPage> {
-  var _wishlistItems = <ProductItem>[];
+  late List<ProductProxy> _wishlistItems;
   final _selectedItems = <String>{};
 
-  bool isSelected(ProductItem item) {
+  bool isSelected(ProductProxy item) {
     return _selectedItems.contains(item.id);
   }
 
-  void setSelected(ProductItem item, bool selected) {
+  void setSelected(ProductProxy item, bool selected) {
     setState(() {
       if (selected) {
         _selectedItems.add(item.id);
@@ -48,7 +51,7 @@ class _WishlistPageState extends State<WishlistPage> {
   void _removeSelected() {
     setState(() {
       for (final selected in _selectedItems) {
-        wishlistRepo.removeToWishlist(selected);
+        di<WishlistRepo>().removeToWishlist(selected);
       }
       _selectedItems.clear();
     });
@@ -59,7 +62,7 @@ class _WishlistPageState extends State<WishlistPage> {
     return SizedBox.expand(
       child: Material(
         child: WishlistConsumer(
-          builder: (BuildContext context, List<ProductItem> wishlist) {
+          builder: (BuildContext context, List<ProductProxy> wishlist) {
             _wishlistItems = wishlist;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,29 +110,37 @@ class _WishlistPageState extends State<WishlistPage> {
                   child: Align(
                     alignment: Alignment.topCenter,
                     heightFactor: _selectedItems.isEmpty ? 0.0 : 1.0,
-                    child: AppPanel(
-                      padding: allPadding24,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: AppButton(
-                              onPressed: _removeSelected,
-                              label: 'Remove',
-                              iconAsset: Assets.iconRemove,
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        color: appLightGreyColor,
+                        border: Border(
+                          top: BorderSide(color: appDividerColor, width: 2.0),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: allPadding24,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: AppButton(
+                                onPressed: _removeSelected,
+                                label: 'Remove',
+                                iconAsset: Assets.iconRemove,
+                              ),
                             ),
-                          ),
-                          horizontalMargin16,
-                          Expanded(
-                            child: AppButton(
-                              onPressed: () {
-                                // FIXME: implement Buy Now button
-                              },
-                              label: 'Buy now',
-                              iconAsset: Assets.iconBuy,
-                              style: AppButtonStyle.highlighted,
+                            horizontalMargin16,
+                            Expanded(
+                              child: AppButton(
+                                onPressed: () {
+                                  // FIXME: implement Buy Now button
+                                },
+                                label: 'Buy now',
+                                iconAsset: Assets.iconBuy,
+                                style: AppButtonStyle.highlighted,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -150,14 +161,16 @@ class WishlistConsumer extends StatelessWidget {
     required this.builder,
   });
 
-  final Widget Function(BuildContext context, List<ProductItem> wishlist) builder;
+  final Widget Function(BuildContext context, List<ProductProxy> wishlist)
+      builder;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<ProductItem>>(
-      initialData: context.wishlistRepo.currentWishlistItems,
-      stream: context.wishlistRepo.streamWishlistItems,
-      builder: (BuildContext context, AsyncSnapshot<List<ProductItem>> snapshot) {
+    return StreamBuilder<List<ProductProxy>>(
+      initialData: di<WishlistRepo>().currentWishlistItems,
+      stream: di<WishlistRepo>().streamWishlistItems,
+      builder:
+          (BuildContext context, AsyncSnapshot<List<ProductProxy>> snapshot) {
         return builder(context, snapshot.requireData);
       },
     );
