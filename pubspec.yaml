@@ -8,7 +8,6 @@ environment:
   flutter: ">=3.13.0"
 
 dependencies:
-  flutter_command: ^5.0.0+14
   connectivity_plus: ^4.0.2
   decimal: ^2.3.3
   flutter:

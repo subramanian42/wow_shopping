@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
+import 'package:watch_it/watch_it.dart';
 import 'package:wow_shopping/app/assets.dart';
 import 'package:wow_shopping/app/theme.dart';
-import 'package:wow_shopping/backend/backend.dart';
+import 'package:wow_shopping/backend/cart_repo.dart';
 import 'package:wow_shopping/models/cart_item.dart';
 import 'package:wow_shopping/widgets/app_icon.dart';
 import 'package:wow_shopping/widgets/common.dart';
@@ -45,14 +46,14 @@ class _CartQuantitySelectorState extends State<CartQuantitySelector> {
 
   void _onQuantityChanged() {
     if (_quantityController.text.trim().isNotEmpty) {
-      context.cartRepo.updateQuantity(widget.item.product.id, quantity);
+      di<CartRepo>().updateQuantity(widget.item.product.id, quantity);
     }
   }
 
   void _onMinusPressed() {
     final current = quantity;
     if (current == 1) {
-      context.cartRepo.removeToCart(widget.item.product.id);
+      di<CartRepo>().removeToCart(widget.item.product.id);
     } else {
       _updateQuantity(quantity - 1);
     }
@@ -101,12 +102,18 @@ class _CartQuantitySelectorState extends State<CartQuantitySelector> {
               InkWell(
                 onTap: _onMinusPressed,
                 child: Padding(
-                  padding: leftPadding12 + rightPadding8 + verticalPadding4 + verticalPadding2,
+                  padding: leftPadding12 +
+                      rightPadding8 +
+                      verticalPadding4 +
+                      verticalPadding2,
                   child: ValueListenableBuilder(
                     valueListenable: _quantityController,
-                    builder: (BuildContext context, TextEditingValue value, Widget? child) {
+                    builder: (BuildContext context, TextEditingValue value,
+                        Widget? child) {
                       return AppIcon(
-                        iconAsset: quantity <= 1 ? Assets.iconRemove : Assets.iconMinus,
+                        iconAsset: quantity <= 1
+                            ? Assets.iconRemove
+                            : Assets.iconMinus,
                         color: appTheme.appColor,
                       );
                     },
@@ -146,7 +153,10 @@ class _CartQuantitySelectorState extends State<CartQuantitySelector> {
               InkWell(
                 onTap: _onAddPressed,
                 child: Padding(
-                  padding: leftPadding8 + rightPadding12 + verticalPadding4 + verticalPadding2,
+                  padding: leftPadding8 +
+                      rightPadding12 +
+                      verticalPadding4 +
+                      verticalPadding2,
                   child: AppIcon(
                     iconAsset: Assets.iconAdd,
                     color: appTheme.appColor,

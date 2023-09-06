@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 import 'package:wow_shopping/app/theme.dart';
-import 'package:wow_shopping/features/product_details/models/product_proxy.dart';
+import 'package:wow_shopping/backend/cart_repo.dart';
 import 'package:wow_shopping/models/product_item.dart';
 import 'package:wow_shopping/widgets/app_button.dart';
 import 'package:wow_shopping/widgets/common.dart';
@@ -18,9 +18,9 @@ class ProductPage extends StatelessWidget {
     required this.item,
   });
 
-  final ProductProxy item;
+  final ProductItem item;
 
-  static Route<void> route(ProductProxy item) {
+  static Route<void> route(ProductItem item) {
     return PageRouteBuilder(
       settings: RouteSettings(name: '/products/${item.id}'),
       transitionDuration: const Duration(milliseconds: 300),
@@ -56,13 +56,13 @@ class ProductPage extends StatelessWidget {
         initialExpanded: const ['description'],
         child: CustomScrollView(
           slivers: [
-            _SliverProductHeader(item: item.productItem),
-            _SliverProductTitle(item: item.productItem),
+            _SliverProductHeader(item: item),
+            _SliverProductTitle(item: item),
             _SliverProductPhotoGallery(
               initialImageIndex: 0,
               item: item,
             ),
-            _SliverProductSizeSelector(item: item.productItem),
+            _SliverProductSizeSelector(item: item),
             const _SliverProductInfoTileHeader(
               section: 'description',
               title: 'Description',
@@ -318,7 +318,7 @@ class _SliverProductPhotoGallery extends StatefulWidget {
   });
 
   final int initialImageIndex;
-  final ProductProxy item;
+  final ProductItem item;
 
   @override
   State<_SliverProductPhotoGallery> createState() =>
@@ -358,7 +358,7 @@ class _SliverProductPhotoGalleryState
                       child: ProductImage(
                         imageIndex: _selectedIndex,
                         inkEnabled: false,
-                        item: widget.item.productItem,
+                        item: widget.item,
                       ),
                     ),
                   ),
@@ -379,7 +379,7 @@ class _SliverProductPhotoGalleryState
                   padding: rightPadding16,
                   child: _PhotoGalleryItem(
                     onPhotoPressed: () => _onPhotoPressed(index),
-                    item: widget.item.productItem,
+                    item: widget.item,
                     index: index,
                     selected: _selectedIndex == index,
                   ),
@@ -504,7 +504,7 @@ class _SliverProductSizeSelector extends StatelessWidget {
                 onPressed: () {
                   // FIXME: add product to cart
                   // FIXME: specify option for size
-                  context.cartRepo.addToCart(item);
+                  di<CartRepo>().addToCart(item);
                 },
                 label: 'Add to cart',
                 style: AppButtonStyle.highlighted,
@@ -608,7 +608,7 @@ class _SliverSimilarItems extends StatelessWidget {
     required this.similarItems,
   });
 
-  final List<ProductProxy> similarItems;
+  final List<ProductItem> similarItems;
 
   @override
   Widget build(BuildContext context) {

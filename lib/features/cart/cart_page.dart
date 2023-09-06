@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wow_shopping/backend/backend.dart';
+import 'package:watch_it/watch_it.dart';
+
 import 'package:wow_shopping/features/cart/checkout_page.dart';
+import 'package:wow_shopping/features/cart/notifier/cart_notifier.dart';
 import 'package:wow_shopping/features/cart/widgets/cart_item.dart';
 import 'package:wow_shopping/features/cart/widgets/cart_page_layout.dart';
 import 'package:wow_shopping/features/cart/widgets/checkout_panel.dart';
@@ -10,7 +12,7 @@ import 'package:wow_shopping/widgets/common.dart';
 import 'package:wow_shopping/widgets/top_nav_bar.dart';
 
 @immutable
-class CartPage extends StatefulWidget {
+class CartPage extends WatchingStatefulWidget {
   const CartPage({super.key});
 
   @override
@@ -20,43 +22,38 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<CartItem>>(
-      initialData: cartRepo.currentCartItems,
-      stream: cartRepo.streamCartItems,
-      builder: (BuildContext context, AsyncSnapshot<List<CartItem>> snapshot) {
-        final items = snapshot.requireData;
-        return Material(
-          child: CartPageLayout(
-            checkoutPanel: CheckoutPanel(
-              onPressed: () {
-                Navigator.of(context).push(CheckoutPage.route());
-              },
-              label: 'Checkout',
+    final cartItems = watchPropertyValue<CartNotifier, List<CartItem>>(
+        (notifier) => notifier.cartItems);
+    return Material(
+      child: CartPageLayout(
+        checkoutPanel: CheckoutPanel(
+          onPressed: () {
+            Navigator.of(context).push(CheckoutPage.route());
+          },
+          label: 'Checkout',
+        ),
+        content: CustomScrollView(
+          slivers: [
+            SliverTopNavBar(
+              title: cartItems.isEmpty
+                  ? const Text('No items in your cart')
+                  : Text('${cartItems.length} items in your cart'),
+              pinned: true,
+              floating: true,
             ),
-            content: CustomScrollView(
-              slivers: [
-                SliverTopNavBar(
-                  title: items.isEmpty
-                      ? const Text('No items in your cart')
-                      : Text('${items.length} items in your cart'),
-                  pinned: true,
-                  floating: true,
-                ),
-                const SliverToBoxAdapter(
-                  child: _DeliveryAddressCta(
-                      // FIXME: onChangeAddress ?
-                      ),
-                ),
-                for (final item in items) //
-                  SliverCartItemView(
-                    key: Key(item.product.id),
-                    item: item,
+            const SliverToBoxAdapter(
+              child: _DeliveryAddressCta(
+                  // FIXME: onChangeAddress ?
                   ),
-              ],
             ),
-          ),
-        );
-      },
+            for (final item in cartItems) //
+              SliverCartItemView(
+                key: Key(item.product.id),
+                item: item,
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

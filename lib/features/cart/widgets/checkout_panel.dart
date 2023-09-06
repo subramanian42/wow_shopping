@@ -1,7 +1,8 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 import 'package:wow_shopping/app/theme.dart';
-import 'package:wow_shopping/backend/backend.dart';
+import 'package:wow_shopping/backend/cart_repo.dart';
 import 'package:wow_shopping/utils/formatting.dart';
 import 'package:wow_shopping/widgets/app_button.dart';
 import 'package:wow_shopping/widgets/app_panel.dart';
@@ -20,8 +21,8 @@ class CheckoutPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Decimal>(
-      initialData: context.cartRepo.currentCartTotal,
-      stream: context.cartRepo.streamCartTotal,
+      initialData: di<CartRepo>().currentCartTotal,
+      stream: di<CartRepo>().streamCartTotal,
       builder: (BuildContext context, AsyncSnapshot<Decimal> snapshot) {
         final total = snapshot.requireData;
         return Hero(
