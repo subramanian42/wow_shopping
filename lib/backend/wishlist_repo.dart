@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:watch_it/watch_it.dart';
 import 'package:wow_shopping/backend/product_repo.dart';
 import 'package:wow_shopping/models/product_item.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -16,7 +17,7 @@ class WishlistRepo {
   late StreamController<List<ProductItem>> _wishlistController;
   Timer? _saveTimer;
 
-  static Future<WishlistRepo> create(ProductsRepo productsRepo) async {
+  static Future<WishlistRepo> create() async {
     WishlistStorage wishlist;
     try {
       final dir = await path_provider.getApplicationDocumentsDirectory();
@@ -28,7 +29,7 @@ class WishlistRepo {
       } else {
         wishlist = WishlistStorage.empty;
       }
-      return WishlistRepo._(productsRepo, file, wishlist)..init();
+      return WishlistRepo._(di.get<ProductsRepo>(), file, wishlist)..init();
     } catch (error, stackTrace) {
       print('$error\n$stackTrace'); // Send to server?
       rethrow;

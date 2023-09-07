@@ -16,12 +16,9 @@ Future<void> setup() async {
     () => CartRepo.create(),
   );
   await di.allReady();
-  di.registerSingletonAsync<WishlistRepo>(
-      () => WishlistRepo.create(di.get<ProductsRepo>()),
+  di.registerSingletonAsync<WishlistRepo>(() => WishlistRepo.create(),
       dependsOn: [ProductsRepo]);
   di.registerSingleton(
-    CartNotifier(
-      di.get<CartRepo>(),
-    ),
+    CartNotifier(),
   );
 }
